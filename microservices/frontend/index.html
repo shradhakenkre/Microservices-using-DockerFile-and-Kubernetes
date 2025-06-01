@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Microservices Demo</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container" id="main">
+    <h1>Microservices Login</h1>
+    <button onclick="login()">Login</button>
+  </div>
+
+  <script>
+    function login() {
+      fetch("http://localhost:5001/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: "admin", password: "1234" })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.message === "Login successful") {
+          const main = document.getElementById("main");
+          main.innerHTML = `
+            <h1>Welcome, admin!</h1>
+            <p>You are now logged in.</p>
+            <button onclick="getUsers()">Get Users</button>
+            <ul id="userList"></ul>
+          `;
+        } else {
+          alert("Login failed");
+        }
+      })
+      .catch(err => console.error("Login error:", err));
+    }
+
+    function getUsers() {
+      fetch("http://localhost:5002/users")
+        .then(res => res.json())
+        .then(users => {
+          const list = document.getElementById("userList");
+          list.innerHTML = "";
+          users.forEach(u => {
+            const li = document.createElement("li");
+            li.textContent = `${u.name} (ID: ${u.id})`;
+            list.appendChild(li);
+          });
+        })
+        .catch(err => console.error("User fetch error:", err));
+    }
+  </script>
+</body>
+</html>
